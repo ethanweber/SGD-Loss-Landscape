@@ -1,0 +1,11 @@
+MODEL:
+  BACKBONE: "resnet"
+DATASET: "datasets/example_dataset"
+OUTPUT_FOLDER: "runs/example_dataset/sg_small"
+OPTIMIZER:
+  LR: 0.001
+DATALOADER:
+  BATCH_SIZE: 1
+  EPOCHS: 10000
+OTHER:
+  NUM_GPU: 1

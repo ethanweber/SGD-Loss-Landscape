@@ -1,3 +1,6 @@
+"""Generate synthetic datasets.
+"""
+
 import argparse
 import pprint
 from sklearn.datasets import make_regression
@@ -14,10 +17,11 @@ parser.add_argument('--percent_splits', type=list, default=[0.6, 0.2, 0.2], help
 if __name__ == "__main__":
     args = parser.parse_args()
     
-    print("Gengerating dataset with args:")
+    print("Generating dataset with args:")
     pprint.pprint(args)
 
     dataset = make_regression(n_samples=args.n, n_features=args.d)
+    # TODO(ethan): add correlation and Gaussian noise params
     X, Y = dataset
 
     dataset_path = os.path.join("datasets", args.dataset_name)
