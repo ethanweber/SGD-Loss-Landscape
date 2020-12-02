@@ -40,10 +40,10 @@ if __name__ == "__main__":
 
     # save files
     np.save(os.path.join(dataset_path, "trainX.npy"), X[split_indices[0]:split_indices[1]])
-    np.save(os.path.join(dataset_path, "trainY.npy"), X[split_indices[0]:split_indices[1]])
+    np.save(os.path.join(dataset_path, "trainY.npy"), Y[split_indices[0]:split_indices[1]])
 
     np.save(os.path.join(dataset_path, "valX.npy"), X[split_indices[1]:split_indices[2]])
-    np.save(os.path.join(dataset_path, "valY.npy"), X[split_indices[1]:split_indices[2]])
+    np.save(os.path.join(dataset_path, "valY.npy"), Y[split_indices[1]:split_indices[2]])
 
     np.save(os.path.join(dataset_path, "testX.npy"), X[split_indices[2]:split_indices[3]])
-    np.save(os.path.join(dataset_path, "testY.npy"), X[split_indices[2]:split_indices[3]])
+    np.save(os.path.join(dataset_path, "testY.npy"), Y[split_indices[2]:split_indices[3]])
