@@ -33,8 +33,9 @@ def main(args):
         bs = training_data.shape[0]
 
     layers = [torch.nn.Linear(feature_dim, feature_dim*2), torch.nn.LeakyReLU()]
-    layers.append([item for _ in range(args.num_layers) for item in [torch.nn.Linear(feature_dim, feature_dim*2), torch.nn.LeakyReLU()]]) 
-    layers.append(torch.nn.Linear(100, 1))
+    layers.extend([item for _ in range(args.num_layers) for item in [torch.nn.Linear(feature_dim*2, feature_dim*2), torch.nn.LeakyReLU()]]) 
+    layers.append(torch.nn.Linear(feature_dim*2, feature_dim))
+    layers.append(torch.nn.Linear(feature_dim, 1))
 
     model = torch.nn.Sequential(*layers)
     model_file = path.join(args.model_path, args.config_name)
