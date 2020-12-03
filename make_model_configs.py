@@ -1,36 +1,38 @@
+"""
+
+Example:
+
+"""
+
+import torch
 import argparse
 import pprint
 from sklearn.datasets import make_regression
-from os import path
+import os
 import numpy as np
+import json
 
 parser = argparse.ArgumentParser(description="")
 parser.add_argument('--num-layers', type=int, default=None, help="Number of layers to add in the model.", required=True)
 parser.add_argument("--batch-size", type=int, required=True)
-parser.add_argument("--dataset-path", type=str, help="Path to dataset.", required=True)
-parser.add_argument("--config-path", type=str, help="Path to store JSON config.", default="configs/")
-parser.add_argument("--config-name", type=str, help="Name of the config file.", required=True) 
-parser.add_argument("--model-path", type=str, help="Path to store model weights.", default="models/")
+parser.add_argument("--dataset-name", type=str, help="Name of dataset.", required=True)
+parser.add_argument("--config-name", type=str, help="Name of the config file.", required=True)
+parser.add_argument("--lr", type=float, help="Learning rate", default=0.001)
 parser.add_argument("--epochs", type=int, help="Number of epochs to train for.", default=1)
-parser.add_argument("--num-gpus", type=int, help="Number of GPUs to use", default=1) 
+parser.add_argument("--num-gpus", type=int, help="Number of GPUs to use", default=1)
+parser.add_argument("--optimizer", type=str, help="Optimizer", default="sgd")
 
 def main(args):
-    print("Generating dataset with args:")
+    args = parser.parse_args()
+    print("Generating model with with args:")
     pprint.pprint(args)
 
-    # make folder if it doesn't exist
-    if not os.path.exists(args.output_path):
-        os.makedirs(args.output_path)
-
-    if not os.path.exists(args.model_path):
-        os.makedirs(args.model_path)
-
-    training_data = np.load(args.dataset_path)
+    training_data = np.load(os.path.join("datasets", args.dataset_name, "trainX.npy"))
     feature_dim = training_data.shape[1]
 
     bs = args.batch_size
-    if args.batch_size=="-1":
-        bs = training_data.shape[0]
+    if bs == -1:
+        bs = int(training_data.shape[0])
 
     layers = [torch.nn.Linear(feature_dim, feature_dim*2), torch.nn.LeakyReLU()]
     layers.extend([item for _ in range(args.num_layers) for item in [torch.nn.Linear(feature_dim*2, feature_dim*2), torch.nn.LeakyReLU()]]) 
@@ -38,23 +40,21 @@ def main(args):
     layers.append(torch.nn.Linear(feature_dim, 1))
 
     model = torch.nn.Sequential(*layers)
-    model_file = path.join(args.model_path, args.config_name)
-    torch.save(model, model_file)
+    torch.save(model, os.path.join("models", args.config_name + ".pth"))
  
     model_definition = {
-        "model_path": model_file 
-        "dataset": args.dataset_path,
-        "output_folder": args.model_path,
+        "config_name": args.config_name,
+        "dataset_name": args.dataset_name,
         "optimizer": args.optimizer,
         "lr": args.lr,
-        "batch_size": bs, 
+        "batch_size": bs,
         "epochs": args.epochs,
         "num_gpus": args.num_gpus
     }
 
-    output_path = path.join(args.config_path, args.config_name)
-    with open(output_path, "wb") as f:
-        json.dumps(f, model_definition)
+    output_path = os.path.join("configs", args.config_name + ".json")
+    with open(output_path, "w") as f:
+        json.dump(model_definition, f)
 
 
 if __name__ == "__main__":
