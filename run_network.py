@@ -12,6 +12,11 @@ import os
 import numpy as np
 import json
 from tqdm import tqdm
+from utils import (
+    make_dir_for_filename,
+    load_from_json,
+    write_to_json
+)
 
 parser = argparse.ArgumentParser(description="")
 parser.add_argument("--config-name", type=str, help="Name of the config file.", required=True)
@@ -23,9 +28,8 @@ if __name__ == "__main__":
     pprint.pprint(args)
 
     print("Loading network from config.")
-    with open(os.path.join("configs", args.config_name + ".json")) as json_file:
-        config = json.load(json_file)
-        assert config["config_name"] == args.config_name
+    config = load_from_json(os.path.join("configs", args.config_name + ".json"))
+    assert config["config_name"] == args.config_name
     print("\nConfig:")
     pprint.pprint(config)
     model = torch.load(os.path.join("models", args.config_name + ".pth"))
@@ -58,6 +62,8 @@ if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
 
+    train_val = {}
+
     for epoch in range(config["epochs"]):
         # train mode
         model.train()
@@ -86,14 +92,18 @@ if __name__ == "__main__":
             running_loss += loss.item()
             pbar.set_description("Average loss: {:.3f}".format(running_loss / num_points))
 
+        # populate the dictionary
+        train_val[epoch] = {}
+        train_val[epoch]["train"] = running_loss
+
         # -----------
         # test mode
         model.eval()
 
         valdataset = NumpyDataset("datasets", config["dataset_name"], "val")
         valdataloader = torch.utils.data.DataLoader(
-            valdataset, 
-            batch_size=config["batch_size"],
+            valdataset,
+            batch_size=1,
             shuffle=False,
             num_workers=4
         )
@@ -115,5 +125,11 @@ if __name__ == "__main__":
         
         valaverageloss = valloss / num_points
         print(valaverageloss)
+        train_val[epoch]["val"] = valaverageloss
 
-    print('Finished Training')
+    # save the results
+    filename = os.path.join("runs", config["config_name"], "train_val.json")
+    make_dir_for_filename(filename)
+    write_to_json(filename, train_val)
+
+    print('Finished training')

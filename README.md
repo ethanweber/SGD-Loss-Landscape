@@ -33,11 +33,10 @@ jupyter notebook --ip 0.0.0.0 --port 8888 --no-browser
     |- <dataset_name>
         |- <config_name>
 |- runs
-    |- <dataset_name>
-        |- <config_name>
-            |- train_val.json   # loss vs. epoch
-            |- test.json        # loss w/ best_weights.pth
-            |- best_weights.pth
+    |- <config_name>
+        |- train_val.json   # loss vs. epoch
+        |- test.json        # loss w/ best_weights.pth
+        |- best_weights.pth
 ```
 
 #### <hr> Getting started
@@ -60,13 +59,16 @@ python make_model_configs.py \
     --batch-size 1 \
     --epochs 10 \
     --dataset-name example_dataset \
-    --config-name example_model_-1
+    --config-name example_model_1
 
 # train the model
 python run_network.py \
-    --config-name example_model \
+    --config-name example_model_1 \
     --mode train
+# TODO: add "test" support
 
+# plot a run
+python plot_run.py --config-name example_model_1
 
 # visualize loss landscape
 python plot_landscape.py
