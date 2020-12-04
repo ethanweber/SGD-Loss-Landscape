@@ -37,17 +37,11 @@ if __name__ == "__main__":
     X = np.load(os.path.join(dataset_path, "trainX.npy"))
     Y = np.load(os.path.join(dataset_path, "trainY.npy"))
 
-
-
-    print(X.shape)
-    print(Y.shape)
-
     # run PCA
     pca = PCA(n_components=2)
     pca_result = pca.fit_transform(X)
 
-
-
+    # plot the PCA results w/ labels
     fig = plt.figure()
     plt.title("train distribution")
     colors = {-1: "red", 1: "green"}

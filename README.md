@@ -32,6 +32,12 @@ jupyter notebook --ip 0.0.0.0 --port 8888 --no-browser
 |- plots
     |- <dataset_name>
         |- <config_name>
+|- runs
+    |- <dataset_name>
+        |- <config_name>
+            |- train_val.json   # loss vs. epoch
+            |- test.json        # loss w/ best_weights.pth
+            |- best_weights.pth
 ```
 
 #### <hr> Getting started
@@ -52,11 +58,14 @@ python plot_dataset.py --dataset_name example_dataset
 python make_model_configs.py \
     --num-layers 4 \
     --batch-size 1 \
+    --epochs 10 \
     --dataset-name example_dataset \
-    --config-name example_model
+    --config-name example_model_-1
 
 # train the model
 python run_network.py \
+    --config-name example_model \
+    --mode train
 
 
 # visualize loss landscape
