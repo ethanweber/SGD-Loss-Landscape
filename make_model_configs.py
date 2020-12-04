@@ -34,10 +34,10 @@ def main(args):
     if bs == -1:
         bs = int(training_data.shape[0])
 
-    layers = [torch.nn.Linear(feature_dim, feature_dim*2, bias=False), torch.nn.Softplus()]
-    layers.extend([item for _ in range(args.num_layers) for item in [torch.nn.Linear(feature_dim*2, feature_dim*2, bias=False), torch.nn.Softplus()]]) 
-    layers.append(torch.nn.Linear(feature_dim*2, feature_dim, bias=False))
-    layers.append(torch.nn.Linear(feature_dim, 1, bias=False))
+    layers = [torch.nn.Linear(feature_dim, feature_dim*2), torch.nn.Softplus()]
+    layers.extend([item for _ in range(args.num_layers) for item in [torch.nn.Linear(feature_dim*2, feature_dim*2), torch.nn.Softplus()]]) 
+    layers.append(torch.nn.Linear(feature_dim*2, feature_dim))
+    layers.append(torch.nn.Linear(feature_dim, 1))
 
     model = torch.nn.Sequential(*layers)
     torch.save(model, os.path.join("models", args.config_name + ".pth"))
