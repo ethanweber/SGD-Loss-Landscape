@@ -34,10 +34,10 @@ def main(args):
     if bs == -1:
         bs = int(training_data.shape[0])
 
-    layers = [torch.nn.Linear(feature_dim, feature_dim*2), torch.nn.LeakyReLU()]
-    layers.extend([item for _ in range(args.num_layers) for item in [torch.nn.Linear(feature_dim*2, feature_dim*2), torch.nn.LeakyReLU()]]) 
-    layers.append(torch.nn.Linear(feature_dim*2, feature_dim))
-    layers.append(torch.nn.Linear(feature_dim, 1))
+    layers = [torch.nn.Linear(feature_dim, feature_dim*2, bias=False), torch.nn.Softplus()]
+    layers.extend([item for _ in range(args.num_layers) for item in [torch.nn.Linear(feature_dim*2, feature_dim*2, bias=False), torch.nn.Softplus()]]) 
+    layers.append(torch.nn.Linear(feature_dim*2, feature_dim, bias=False))
+    layers.append(torch.nn.Linear(feature_dim, 1, bias=False))
 
     model = torch.nn.Sequential(*layers)
     torch.save(model, os.path.join("models", args.config_name + ".pth"))
@@ -55,7 +55,7 @@ def main(args):
     output_path = os.path.join("configs", args.config_name + ".json")
     with open(output_path, "w") as f:
         json.dump(model_definition, f)
-
+    print(f"Wrote model config {args.config_name} to {output_path}!")
 
 if __name__ == "__main__":
     args = parser.parse_args()

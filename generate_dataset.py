@@ -24,6 +24,8 @@ if __name__ == "__main__":
     dataset = make_classification(n_samples=args.n, n_features=args.d, n_classes=2)
     # TODO(ethan): add correlation and Gaussian noise params
     X, Y = dataset
+    X = X.astype(np.float16)
+    Y = Y.astype(np.float16)
 
     # TODO: decide if this is accurate
     Y[Y == 0.0] = -1.0 # so we have labels {-1, 1}

@@ -1,0 +1,1 @@
+{"config_name": "first", "dataset_name": "first", "optimizer": "sgd", "lr": 0.001, "batch_size": 1, "epochs": 4, "num_gpus": 1}
