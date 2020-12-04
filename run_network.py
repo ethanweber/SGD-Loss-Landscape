@@ -66,7 +66,7 @@ if __name__ == "__main__":
             optimizer.zero_grad()
 
             # # forward + backward + optimize
-            outputs = model(inputs)
+            outputs = model(inputs).view(-1) # since scalar output
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()

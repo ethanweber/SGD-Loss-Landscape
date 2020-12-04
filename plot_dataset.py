@@ -6,6 +6,10 @@ import pprint
 from sklearn.datasets import make_regression
 import os
 import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+
+from utils import make_dir_for_filename
 
 parser = argparse.ArgumentParser(description="")
 parser.add_argument('--n', type=int, default=1000, help="number of data points")
@@ -33,7 +37,30 @@ if __name__ == "__main__":
     X = np.load(os.path.join(dataset_path, "trainX.npy"))
     Y = np.load(os.path.join(dataset_path, "trainY.npy"))
 
+
+
     print(X.shape)
     print(Y.shape)
 
-    # TODO(ethan): plot the data
+    # run PCA
+    pca = PCA(n_components=2)
+    pca_result = pca.fit_transform(X)
+
+
+
+    fig = plt.figure()
+    plt.title("train distribution")
+    colors = {-1: "red", 1: "green"}
+    for label in sorted(colors.keys(), reverse=True):
+        idx = np.where(Y==label)
+        plt.scatter(
+            pca_result[:,0][idx], 
+            pca_result[:,1][idx], 
+            label=f"y = {label} ({colors[label]})", 
+            color=colors[label], 
+            alpha=0.1
+        )
+    filename = os.path.join("plots", args.dataset_name, "train_dist.png")
+    make_dir_for_filename(filename)
+    plt.legend()
+    plt.savefig(filename)
