@@ -51,19 +51,13 @@ def eval_loss(net, criterion, loader, use_cuda=False):
                 total += batch_size
                 inputs = Variable(inputs)
 
-                one_hot_targets = torch.FloatTensor(batch_size, 10).zero_()
-                indicies = targets.view(batch_size, 1).to(torch.int64)
-                one_hot_targets = one_hot_targets.scatter_(1, indicies, 1)
-                one_hot_targets = one_hot_targets.float()
-                one_hot_targets = Variable(one_hot_targets)
                 if use_cuda:
                     inputs, targets = inputs.cuda(), targets.cuda()
                 outputs = net(inputs)
                 print(outputs)
                 print(targets)
                 loss = criterion(outputs, targets)
-                total_loss += loss.item()*batch_size
-                _, predicted = torch.max(outputs.data, 1)
-                correct += predicted.cpu().eq(targets.cpu()).sum().item()
+                total_loss += loss.item()
+                correct = predicted.eq(targets).sum().item()
 
     return total_loss/total, 100.*correct/total
