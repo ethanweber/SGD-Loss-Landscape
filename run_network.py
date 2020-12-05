@@ -156,8 +156,8 @@ def main(args):
             if val_loss < best_loss:
                 # save the results
                 best_loss = val_loss
+                torch.save(model, os.path.join("runs", args.config_name, "best_weights.pth"))
                 print(f"Achieved the best loss at {best_loss}.")
-                # TODO: save the weights
         
         write_to_json(results_filename, train_val)
         print("\n\n")
