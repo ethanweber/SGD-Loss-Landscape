@@ -11,8 +11,8 @@ def get_model(feature_dim, num_layers):
     """
     activation = torch.nn.Softplus()
     # activation = torch.nn.ReLU()
-    layers = [torch.nn.Linear(feature_dim, 1024), activation]
-    layers += [item for _ in range(num_layers) for item in [torch.nn.Linear(1024, 1024), activation]]
-    layers.append(torch.nn.Linear(1024, 1))
+    layers = [torch.nn.Linear(feature_dim, 512), activation]
+    layers += [item for _ in range(num_layers) for item in [torch.nn.Linear(512, 512), activation]]
+    layers.append(torch.nn.Linear(512, 1))
     model = torch.nn.Sequential(*layers)
     return model

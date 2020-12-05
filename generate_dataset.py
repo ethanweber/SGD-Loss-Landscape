@@ -21,7 +21,7 @@ if __name__ == "__main__":
     print("Generating dataset with args:")
     pprint.pprint(args)
 
-    dataset = make_regression(n_samples=args.n, n_features=args.d)
+    dataset = make_regression(n_samples=args.n, n_features=args.d, noise=10.0)
     # dataset = make_classification(n_samples=args.n, n_features=args.d, n_classes=2)
     # TODO(ethan): add correlation and Gaussian noise params
     X, Y = dataset
