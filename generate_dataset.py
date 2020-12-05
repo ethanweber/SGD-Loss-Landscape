@@ -4,6 +4,7 @@
 import argparse
 import pprint
 from sklearn.datasets import make_regression, make_classification
+from sklearn.preprocessing import MinMaxScaler
 import os
 import numpy as np
 
@@ -20,15 +21,25 @@ if __name__ == "__main__":
     print("Generating dataset with args:")
     pprint.pprint(args)
 
-    # dataset = make_regression(n_samples=args.n, n_features=args.d)
-    dataset = make_classification(n_samples=args.n, n_features=args.d, n_classes=2)
+    dataset = make_regression(n_samples=args.n, n_features=args.d)
+    # dataset = make_classification(n_samples=args.n, n_features=args.d, n_classes=2)
     # TODO(ethan): add correlation and Gaussian noise params
     X, Y = dataset
-    X = X.astype(np.float16)
-    Y = Y.astype(np.float16)
+    X = np.resize(X, (X.shape[0], args.d)).astype(np.float32)
+    Y = np.resize(Y, (Y.shape[0], 1)).astype(np.float32)
+
+    # normalize dataset
+    scaler = MinMaxScaler()
+    scaler.fit(Y)
+    X = scaler.transform(X)
+    Y = (scaler.transform(Y) * 2.0) - 1.0
+    print(X.shape)
+    print(Y.shape)
+
+
 
     # TODO: decide if this is accurate
-    Y[Y == 0.0] = -1.0 # so we have labels {-1, 1}
+    # Y[Y == 0.0] = -1.0 # so we have labels {-1, 1}
 
     dataset_path = os.path.join("datasets", args.dataset_name)
     

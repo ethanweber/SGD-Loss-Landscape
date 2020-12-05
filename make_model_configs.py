@@ -11,6 +11,7 @@ from sklearn.datasets import make_regression
 import os
 import numpy as np
 import json
+from modeling import get_model
 
 parser = argparse.ArgumentParser(description="")
 parser.add_argument('--num-layers', type=int, default=None, help="Number of layers to add in the model.", required=True)
@@ -21,6 +22,9 @@ parser.add_argument("--lr", type=float, help="Learning rate", default=0.001)
 parser.add_argument("--epochs", type=int, help="Number of epochs to train for.", default=1)
 parser.add_argument("--num-gpus", type=int, help="Number of GPUs to use", default=1)
 parser.add_argument("--optimizer", type=str, help="Optimizer", default="sgd")
+
+# NOTE(ethan): this is important so the weights start at the same place!
+torch.manual_seed(0)
 
 def main(args):
     args = parser.parse_args()
@@ -34,12 +38,7 @@ def main(args):
     if bs == -1:
         bs = int(training_data.shape[0])
 
-    layers = [torch.nn.Linear(feature_dim, feature_dim*2), torch.nn.Softplus()]
-    layers.extend([item for _ in range(args.num_layers) for item in [torch.nn.Linear(feature_dim*2, feature_dim*2), torch.nn.Softplus()]]) 
-    layers.append(torch.nn.Linear(feature_dim*2, feature_dim))
-    layers.append(torch.nn.Linear(feature_dim, 1))
-
-    model = torch.nn.Sequential(*layers)
+    model = get_model(feature_dim, args.num_layers)
     torch.save(model, os.path.join("models", args.config_name + ".pth"))
  
     model_definition = {

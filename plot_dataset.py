@@ -3,7 +3,6 @@
 
 import argparse
 import pprint
-from sklearn.datasets import make_regression
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -20,13 +19,7 @@ parser.add_argument('--percent_splits', type=list, default=[0.6, 0.2, 0.2], help
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    
-    print("Generating dataset with args:")
     pprint.pprint(args)
-
-    dataset = make_regression(n_samples=args.n, n_features=args.d)
-    # TODO(ethan): add correlation and Gaussian noise params
-    X, Y = dataset
 
     dataset_path = os.path.join("datasets", args.dataset_name)
     
@@ -44,17 +37,14 @@ if __name__ == "__main__":
     # plot the PCA results w/ labels
     fig = plt.figure()
     plt.title("train distribution")
-    colors = {-1: "red", 1: "green"}
-    for label in sorted(colors.keys(), reverse=True):
-        idx = np.where(Y==label)
-        plt.scatter(
-            pca_result[:,0][idx], 
-            pca_result[:,1][idx], 
-            label=f"y = {label} ({colors[label]})", 
-            color=colors[label], 
-            alpha=0.1
-        )
+    plt.scatter(
+        pca_result[:,0], 
+        pca_result[:,1],
+        c=Y[:,0],
+        cmap="hot",
+        alpha=0.5
+    )
     filename = os.path.join("plots", args.dataset_name, "train_dist.png")
     make_dir_for_filename(filename)
-    plt.legend()
+    plt.colorbar()
     plt.savefig(filename)
