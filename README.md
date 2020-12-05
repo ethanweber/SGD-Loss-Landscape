@@ -47,7 +47,7 @@ jupyter notebook --ip 0.0.0.0 --port 8888 --no-browser
 # create dataset
 python generate_dataset.py \
     --n 1000 \
-    --d 100 \
+    --d 256 \
     --dataset_name example_dataset
 
 # plot dataset

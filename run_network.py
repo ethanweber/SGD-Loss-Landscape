@@ -43,9 +43,7 @@ def main(args):
     pprint.pprint(model)
     
     # TODO(ethan): choose optimer
-    optimizer = optim.SGD(model.parameters(), lr=config["lr"], momentum=0.9)
-
-    criterion = nn.MSELoss(reduction="sum")
+    optimizer = optim.SGD(model.parameters(), lr=config["lr"], momentum=0.0)
      
     train_dataset = NumpyDataset("datasets", config["dataset_name"], "train") 
     train_dataloader = torch.utils.data.DataLoader(
@@ -65,14 +63,55 @@ def main(args):
     results_filename = os.path.join("runs", config["config_name"], "train_val.json")
     make_dir_for_filename(results_filename)
 
+
+    def get_error_on_dataset(dataset, model):
+        """Returns the error for a dataset and model.
+        """
+
+        # test mode
+        model.eval()
+
+        criterion = nn.MSELoss(reduction="sum")
+
+        total_error = 0.0
+        dataloader = torch.utils.data.DataLoader(
+            dataset,
+            batch_size=1,
+            shuffle=False,
+            num_workers=4
+        )
+        # TODO: assert batch_size is 1
+        for idx, batch_data in enumerate(dataloader):
+            inputs, labels = batch_data
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+
+            outputs = model(inputs)
+            error = criterion(outputs, labels)
+            total_error += error.item()
+        return total_error / len(dataset)
+
+    train_val[-1] = {}
+
+    error = get_error_on_dataset(train_dataset, model)
+    print("Initial training error: {:03f}".format(error))
+    train_val[-1]["train"] = error
+
+    val_dataset = NumpyDataset("datasets", config["dataset_name"], "val")
+    error = get_error_on_dataset(val_dataset, model)
+    print("Initial validation error: {:03f}".format(error))
+    train_val[-1]["val"] = error
+
+
     for epoch in range(config["epochs"]):
         if not args.skip_train:
             # train mode
             model.train()
 
-            running_loss = 0.0
+            criterion = nn.MSELoss(reduction="sum")
+
+            train_loss = 0.0
             num_points = 0.0
-            print("Epoch: {}".format(epoch))
             pbar = tqdm(enumerate(train_dataloader), total=len(train_dataloader))
             for idx, batch_data in pbar:
                 
@@ -85,55 +124,34 @@ def main(args):
                 optimizer.zero_grad()
 
                 # # forward + backward + optimize
-                outputs = model(inputs).view(-1) # since scalar output
+                outputs = model(inputs)
                 loss = criterion(outputs, labels)
-                loss.backward()
+                (loss / len(labels)).backward()
                 optimizer.step()
 
                 # print statistics
-                running_loss += loss.item()
-                pbar.set_description("Average loss: {:.3f}".format(running_loss / num_points))
+                train_loss += loss.item()
+                pbar.set_description("Epoch: {}, Ave. train loss: {:.5f}".format(epoch, train_loss / num_points))
 
             # populate the dictionary
+            error = get_error_on_dataset(train_dataset, model)
             train_val[epoch] = {}
-            train_val[epoch]["train"] = running_loss
+            train_val[epoch]["train"] = error
+            print("Training set loss:", error)
+
 
         if not args.skip_val:
-            # test mode
-            model.eval()
-
-            val_dataset = NumpyDataset("datasets", config["dataset_name"], "val")
-            val_dataloader = torch.utils.data.DataLoader(
-                val_dataset,
-                batch_size=1,
-                shuffle=False,
-                num_workers=4
-            )
-
-            print("Running on validation.")
-            val_loss = 0.0
-            num_points = 0
-            for idx, batch_data in tqdm(enumerate(val_dataloader), total=len(val_dataloader)):
-
-                inputs, labels = batch_data
-                inputs = inputs.to(device)
-                labels = labels.to(device)
-                num_points += len(labels)
-
-                # # forward + backward + optimize
-                outputs = model(inputs).view(-1) # since scalar output
-                loss = criterion(outputs, labels)
-                val_loss += loss.item()
-            
+            val_loss = get_error_on_dataset(val_dataset, model)
+            train_val[epoch]["val"] = val_loss
+            print("Validaton set loss:", val_loss)
             if val_loss < best_loss:
                 # save the results
-                write_to_json(results_filename, train_val)
-                torch.save(model, os.path.join("models", args.config_name + ".pth"))
                 best_loss = val_loss
-                print("Achieved the best loss at {best_loss}.")
-
-            print("Validaton set loss:", val_loss)
-            train_val[epoch]["val"] = val_loss 
+                torch.save(model, os.path.join("runs", args.config_name, "best_weights.pth"))
+                print(f"Achieved the best loss at {best_loss}.")
+        
+        write_to_json(results_filename, train_val)
+        print("\n\n")
 
     print('Finished training')
 
