@@ -27,3 +27,5 @@ class NumpyDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         return self.X[idx].astype("float32"), self.Y[idx].astype("float32")
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
