@@ -16,7 +16,8 @@ from tqdm import tqdm
 from utils import (
     make_dir_for_filename,
     load_from_json,
-    write_to_json
+    write_to_json,
+    NumpyDataset
 )
 
 def parse_args():
