@@ -19,15 +19,6 @@ from utils import (
     write_to_json
 )
 
-class NumpyDataset(torch.utils.data.Dataset):
-    def __init__(self, dataset_prefix, dataset_name, mode):
-        self.X = np.load(os.path.join(dataset_prefix, dataset_name, f"{mode}X.npy"))
-        self.Y = np.load(os.path.join(dataset_prefix, dataset_name, f"{mode}Y.npy"))
-    def __len__(self):
-        return len(self.X)
-    def __getitem__(self, idx):
-        return self.X[idx].astype("float32"), self.Y[idx].astype("float32")
-
 def parse_args():
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("--config-name", type=str, help="Name of the config file.", required=True)
