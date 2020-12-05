@@ -161,6 +161,9 @@ def main(args):
 
         test_dataset = NumpyDataset("datasets", config["dataset_name"], "test") 
         test_loss = get_error_on_dataset(test_dataset, model)
+        filename = os.path.join("runs", config["config_name"], "test.json")
+        make_dir_for_filename(filename)
+        write_to_json(filename, {"test_loss": test_loss})
         print("Test set loss:", test_loss)
 
 
