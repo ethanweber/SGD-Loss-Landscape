@@ -12,6 +12,7 @@ import os
 import numpy as np
 import json
 from modeling import get_model
+import utils
 
 parser = argparse.ArgumentParser(description="")
 parser.add_argument('--num-layers', type=int, default=None, help="Number of layers to add in the model.", required=True)
@@ -55,6 +56,7 @@ def main(args):
     with open(output_path, "w") as f:
         json.dump(model_definition, f)
     print(f"Wrote model config {args.config_name} to {output_path}!")
+    print(f"Number of parameters in the model: {utils.count_parameters(model):,}")
 
 if __name__ == "__main__":
     args = parser.parse_args()
