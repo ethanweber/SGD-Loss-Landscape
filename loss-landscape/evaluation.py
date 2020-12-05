@@ -54,10 +54,8 @@ def eval_loss(net, criterion, loader, use_cuda=False):
                 if use_cuda:
                     inputs, targets = inputs.cuda(), targets.cuda()
                 outputs = net(inputs)
-                print(outputs)
-                print(targets)
                 loss = criterion(outputs, targets)
                 total_loss += loss.item()
-                correct = predicted.eq(targets).sum().item()
+                correct = outputs.eq(targets).sum().item()
 
     return total_loss/total, 100.*correct/total
