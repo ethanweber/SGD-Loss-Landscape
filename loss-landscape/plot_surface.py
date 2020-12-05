@@ -112,6 +112,7 @@ def crunch(surf_file, net, w, s, d, dataloader, loss_key, acc_key, comm, rank, a
 
         # Load the weights corresponding to those coordinates into the net
         if args.dir_type == 'weights':
+            print(d)
             net_plotter.set_weights(net.module if args.ngpu > 1 else net, w, d, coord)
         elif args.dir_type == 'states':
             net_plotter.set_states(net.module if args.ngpu > 1 else net, s, d, coord)
@@ -229,7 +230,7 @@ if __name__ == '__main__':
     # Check plotting resolution
     #--------------------------------------------------------------------------
     try:
-        args.xmin, args.xmax, args.xnum = [float(a) for a in args.x.split(':')]
+        args.xmin, args.xmax, args.xnum = [int(a) for a in args.x.split(':')]
         args.ymin, args.ymax, args.ynum = (None, None, None)
         if args.y:
             args.ymin, args.ymax, args.ynum = [float(a) for a in args.y.split(':')]
@@ -241,8 +242,13 @@ if __name__ == '__main__':
     #--------------------------------------------------------------------------
     # Load models and extract parameters
     #--------------------------------------------------------------------------
-    net = model_loader.load(args.dataset, args.model, args.model_file)
+    if args.dataset=="regression":
+        net, trainloader, testloader = model_loader.load_regression(args.datapath, data_parallel=False)    
+    else:
+        net = model_loader.load(args.dataset, args.model, args.model_file)
+        net.to("cuda")
     w = net_plotter.get_weights(net) # initial parameters
+    print(w[0])
     s = copy.deepcopy(net.state_dict()) # deepcopy since state_dict are references
     if args.ngpu > 1:
         # data parallel with multiple GPUs on a single node
@@ -273,19 +279,23 @@ if __name__ == '__main__':
     # Setup dataloader
     #--------------------------------------------------------------------------
     # download CIFAR10 if it does not exit
-    if rank == 0 and args.dataset == 'cifar10':
-        torchvision.datasets.CIFAR10(root=args.dataset + '/data', train=True, download=True)
+    if args.dataset!="regression":
+        if rank == 0 and args.dataset == 'cifar10':
+            torchvision.datasets.CIFAR10(root=args.dataset + '/data', train=True, download=True)
 
-    mpi.barrier(comm)
+        mpi.barrier(comm)
 
-    trainloader, testloader = dataloader.load_dataset(args.dataset, args.datapath,
-                                args.batch_size, args.threads, args.raw_data,
-                                args.data_split, args.split_idx,
-                                args.trainloader, args.testloader)
+        trainloader, testloader = dataloader.load_dataset(args.dataset, args.datapath,
+                                    args.batch_size, args.threads, args.raw_data,
+                                    args.data_split, args.split_idx,
+                                    args.trainloader, args.testloader)
 
     #--------------------------------------------------------------------------
     # Start the computation
     #--------------------------------------------------------------------------
+    # w is the weights
+    # s is the state_dict
+    # d is the set of random directions 
     crunch(surf_file, net, w, s, d, trainloader, 'train_loss', 'train_acc', comm, rank, args)
     # crunch(surf_file, net, w, s, d, testloader, 'test_loss', 'test_acc', comm, rank, args)
 
