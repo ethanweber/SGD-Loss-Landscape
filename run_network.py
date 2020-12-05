@@ -16,7 +16,8 @@ from tqdm import tqdm
 from utils import (
     make_dir_for_filename,
     load_from_json,
-    write_to_json
+    write_to_json,
+    NumpyDataset
 )
 
 def parse_args():
@@ -159,26 +160,7 @@ def main(args):
         print('Starting test...')
 
         test_dataset = NumpyDataset("datasets", config["dataset_name"], "test") 
-        test_dataloader = torch.utils.data.DataLoader(
-            test_dataset, 
-            batch_size=config["batch_size"],
-            shuffle=True,
-            num_workers=4
-        )
-        print("Running on validation.")
-        test_loss = 0.0
-        num_points = 0
-        for idx, batch_data in tqdm(enumerate(test_dataloader), total=len(test_dataloader)):
-            inputs, labels = batch_data
-            inputs = inputs.to(device)
-            labels = labels.to(device)
-            num_points += len(labels)
-
-            # # forward + backward + optimize
-            outputs = model(inputs).view(-1) # since scalar output
-            loss = criterion(outputs, labels)
-            test_loss += loss.item()
-        
+        test_loss = get_error_on_dataset(test_dataset, model)
         print("Test set loss:", test_loss)
 
 
