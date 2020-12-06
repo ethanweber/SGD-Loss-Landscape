@@ -19,6 +19,7 @@ from utils import (
     write_to_json,
     NumpyDataset
 )
+from modeling import get_model
 
 
 def parse_args():
@@ -59,6 +60,8 @@ def main(args):
     # move to specified devices
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
+    for param in model.parameters():  # sanity check
+        param.requires_grad = True
 
     train_val = {}
     best_loss = float("inf")
@@ -88,8 +91,12 @@ def main(args):
             inputs = inputs.to(device)
             labels = labels.to(device)
 
-            outputs = model(inputs)
-            error = criterion(outputs, labels)
+            with torch.no_grad():
+                outputs = model(inputs)
+
+            # print(outputs)
+            # error = criterion(outputs, labels)
+            error = torch.pow(outputs - labels, 2).sum()
             total_error += error.item()
         return total_error / len(dataset)
 
@@ -122,7 +129,8 @@ def main(args):
 
                 # # forward + backward + optimize
                 outputs = model(inputs)
-                loss = criterion(outputs, labels)
+                # loss = criterion(outputs, labels)
+                loss = torch.pow(outputs - labels, 2).sum()
                 (loss / len(labels)).backward()
                 optimizer.step()
                 # zero the parameter gradients
@@ -139,8 +147,8 @@ def main(args):
             print("Training set loss:", error)
 
         if not args.skip_val:
-            for i in range(len(val_dataset)):
-                print(val_dataset[i])
+            # for i in range(len(val_dataset)):
+            #     print(val_dataset[i])
             val_loss = get_error_on_dataset(val_dataset, model)
             train_val[epoch]["val"] = val_loss
             print("Validation set loss:", val_loss)

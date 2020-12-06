@@ -24,9 +24,9 @@ if __name__ == "__main__":
     # TODO(ethan): what to do with n_informative?
     dataset = make_regression(n_samples=args.n,
                               n_features=args.d,
-                              n_informative=max(args.d // 2, 1),
-                              noise=100000.0,
-                              random_state=0)
+                              n_informative=10,
+                              noise=0.0,
+                              random_state=10)
     # dataset = make_classification(n_samples=args.n, n_features=args.d, n_classes=2)
     # TODO(ethan): add correlation and Gaussian noise params
     X, Y = dataset
@@ -46,7 +46,8 @@ if __name__ == "__main__":
     # [-1, 1]
     Y = Y - Y.min()
     Y /= (Y.max() - Y.min())
-    Y = 2 * Y - 1.0
+    scalar = 1.0
+    Y = (scalar * 2 * Y) - scalar
     # print(X.shape)
     # print(Y.shape)
 

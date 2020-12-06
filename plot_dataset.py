@@ -14,8 +14,6 @@ parser = argparse.ArgumentParser(description="")
 parser.add_argument('--n', type=int, default=1000, help="number of data points")
 parser.add_argument('--d', type=int, default=100, help="feature dimension")
 parser.add_argument('--dataset_name', type=str, default="example_dataset", help="dataset name")
-parser.add_argument('--percent_splits', type=list, default=[0.6, 0.2, 0.2], help="percent splits")
-
 
 if __name__ == "__main__":
     args = parser.parse_args()
