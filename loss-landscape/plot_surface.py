@@ -112,7 +112,6 @@ def crunch(surf_file, net, w, s, d, dataloader, loss_key, acc_key, comm, rank, a
 
         # Load the weights corresponding to those coordinates into the net
         if args.dir_type == 'weights':
-            print(d)
             net_plotter.set_weights(net.module if args.ngpu > 1 else net, w, d, coord)
         elif args.dir_type == 'states':
             net_plotter.set_states(net.module if args.ngpu > 1 else net, s, d, coord)
@@ -233,7 +232,7 @@ if __name__ == '__main__':
         args.xmin, args.xmax, args.xnum = [int(a) for a in args.x.split(':')]
         args.ymin, args.ymax, args.ynum = (None, None, None)
         if args.y:
-            args.ymin, args.ymax, args.ynum = [float(a) for a in args.y.split(':')]
+            args.ymin, args.ymax, args.ynum = [int(a) for a in args.y.split(':')]
             assert args.ymin and args.ymax and args.ynum, \
             'You specified some arguments for the y axis, but not all'
     except:
@@ -248,7 +247,6 @@ if __name__ == '__main__':
         net = model_loader.load(args.dataset, args.model, args.model_file)
         net.to("cuda")
     w = net_plotter.get_weights(net) # initial parameters
-    print(w[0])
     s = copy.deepcopy(net.state_dict()) # deepcopy since state_dict are references
     if args.ngpu > 1:
         # data parallel with multiple GPUs on a single node
