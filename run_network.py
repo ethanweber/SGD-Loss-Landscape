@@ -20,13 +20,14 @@ from utils import (
     NumpyDataset
 )
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("--config-name", type=str, help="Name of the config file.", required=True)
     # parser.add_argument("--mode", type=str, default="train", choices=["train", "val", "test"], help="Which action to perform.")
     parser.add_argument("--skip-train", action="store_true", help="Whether to train the network.")
     parser.add_argument("--skip-val", action="store_true", help="Whether to measure the validation set performance.")
-    parser.add_argument("--skip-test", action="store_true", help="Whether to measure performance on the test set.") 
+    parser.add_argument("--skip-test", action="store_true", help="Whether to measure performance on the test set.")
     return parser.parse_args()
 
 
@@ -42,17 +43,18 @@ def main(args):
     model = torch.load(os.path.join("models", args.config_name + ".pth"))
     print("\nModel:")
     pprint.pprint(model)
-    
+
     # TODO(ethan): choose optimer
     optimizer = optim.SGD(model.parameters(), lr=config["lr"], momentum=0.0)
-     
-    train_dataset = NumpyDataset("datasets", config["dataset_name"], "train") 
+
+    train_dataset = NumpyDataset("datasets", config["dataset_name"], "train")
     train_dataloader = torch.utils.data.DataLoader(
-        train_dataset, 
+        train_dataset,
         batch_size=config["batch_size"],
         shuffle=True,
         num_workers=4
     )
+    val_dataset = NumpyDataset("datasets", config["dataset_name"], "val")
 
     # move to specified devices
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -63,7 +65,6 @@ def main(args):
 
     results_filename = os.path.join("runs", config["config_name"], "train_val.json")
     make_dir_for_filename(results_filename)
-
 
     def get_error_on_dataset(dataset, model):
         """Returns the error for a dataset and model.
@@ -98,11 +99,9 @@ def main(args):
     print("Initial training error: {:03f}".format(error))
     train_val[-1]["train"] = error
 
-    val_dataset = NumpyDataset("datasets", config["dataset_name"], "val")
     error = get_error_on_dataset(val_dataset, model)
     print("Initial validation error: {:03f}".format(error))
     train_val[-1]["val"] = error
-
 
     for epoch in range(config["epochs"]):
         if not args.skip_train:
@@ -115,20 +114,19 @@ def main(args):
             num_points = 0.0
             pbar = tqdm(enumerate(train_dataloader), total=len(train_dataloader))
             for idx, batch_data in pbar:
-                
+
                 inputs, labels = batch_data
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 num_points += len(labels)
-
-                # zero the parameter gradients
-                optimizer.zero_grad()
 
                 # # forward + backward + optimize
                 outputs = model(inputs)
                 loss = criterion(outputs, labels)
                 (loss / len(labels)).backward()
                 optimizer.step()
+                # zero the parameter gradients
+                optimizer.zero_grad()
 
                 # print statistics
                 train_loss += loss.item()
@@ -140,17 +138,18 @@ def main(args):
             train_val[epoch]["train"] = error
             print("Training set loss:", error)
 
-
         if not args.skip_val:
+            for i in range(len(val_dataset)):
+                print(val_dataset[i])
             val_loss = get_error_on_dataset(val_dataset, model)
             train_val[epoch]["val"] = val_loss
-            print("Validaton set loss:", val_loss)
+            print("Validation set loss:", val_loss)
             if val_loss < best_loss:
                 # save the results
                 best_loss = val_loss
                 torch.save(model, os.path.join("runs", args.config_name, "best_weights.pth"))
                 print(f"Achieved the best loss at {best_loss}.")
-        
+
         write_to_json(results_filename, train_val)
         print("\n\n")
 
@@ -159,7 +158,7 @@ def main(args):
     if not args.skip_test:
         print('Starting test...')
 
-        test_dataset = NumpyDataset("datasets", config["dataset_name"], "test") 
+        test_dataset = NumpyDataset("datasets", config["dataset_name"], "test")
         test_loss = get_error_on_dataset(test_dataset, model)
         filename = os.path.join("runs", config["config_name"], "test.json")
         make_dir_for_filename(filename)
