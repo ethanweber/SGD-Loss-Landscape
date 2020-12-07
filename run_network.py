@@ -42,6 +42,10 @@ def main(args):
     print("\nConfig:")
     pprint.pprint(config)
     model = torch.load(os.path.join("models", args.config_name + ".pth"))
+    if args.skip_train:
+        path = os.path.join("runs/", args.config_name, "best_weights.pth")
+        model = torch.load(path)
+
     print("\nModel:")
     pprint.pprint(model)
 
@@ -158,8 +162,8 @@ def main(args):
                 torch.save(model, os.path.join("runs", args.config_name, "best_weights.pth"))
                 print(f"Achieved the best loss at {best_loss}.")
 
-        write_to_json(results_filename, train_val)
-        print("\n\n")
+            write_to_json(results_filename, train_val)
+            print("\n\n")
 
     print('Finished training')
 
