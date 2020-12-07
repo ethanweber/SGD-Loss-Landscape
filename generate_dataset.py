@@ -24,9 +24,11 @@ if __name__ == "__main__":
     # TODO(ethan): what to do with n_informative?
     dataset = make_regression(n_samples=args.n,
                               n_features=args.d,
-                              n_informative=10,
-                              noise=0.0,
-                              random_state=10)
+                              n_informative=10,  # max(args.d // 10, 10),
+                              #   effective_rank=args.d,
+                              #   effective_rank=10,
+                              noise=100.0,
+                              random_state=2)
     # dataset = make_classification(n_samples=args.n, n_features=args.d, n_classes=2)
     # TODO(ethan): add correlation and Gaussian noise params
     X, Y = dataset
