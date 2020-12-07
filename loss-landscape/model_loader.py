@@ -17,7 +17,10 @@ def load_regression(config_name, data_parallel=False):
     assert config["config_name"] == config_name
     print("\nConfig:")
     pprint.pprint(config)
-    model = torch.load(os.path.join("../models", config_name + ".pth"))
+    path = os.path.join("../runs/", config_name, "best_weights.pth")
+    print(f"Loading weights from", path)
+    model = torch.load(path)
+    model = model.to("cuda")
     print("\nModel:")
     pprint.pprint(model)
 
@@ -25,14 +28,14 @@ def load_regression(config_name, data_parallel=False):
     test_dataset = utils.NumpyDataset("../datasets", config["dataset_name"], "test") 
     train_dataloader = torch.utils.data.DataLoader(
         train_dataset, 
-        batch_size=config["batch_size"],
+        batch_size=1,
         shuffle=True,
         num_workers=4
     )
 
     test_dataloader = torch.utils.data.DataLoader(
         test_dataset, 
-        batch_size=config["batch_size"],
+        batch_size=1,
         shuffle=True,
         num_workers=4
     )

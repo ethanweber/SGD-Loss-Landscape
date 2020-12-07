@@ -38,7 +38,10 @@ def set_weights(net, weights, directions=None, step=None):
             changes = [d*step for d in directions[0]]
 
         for (p, w, d) in zip(net.parameters(), weights, changes):
-            d = torch.Tensor(d).type(type(w))
+            d = torch.Tensor(d).type(type(w)).to("cuda")
+            # print(d)
+            # print(w)
+            # print(p)
             p.data = w + d
 
 

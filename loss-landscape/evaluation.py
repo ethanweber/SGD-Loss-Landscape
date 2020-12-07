@@ -55,7 +55,7 @@ def eval_loss(net, criterion, loader, use_cuda=False):
                     inputs, targets = inputs.cuda(), targets.cuda()
                 outputs = net(inputs)
                 loss = criterion(outputs, targets)
-                total_loss += loss.item()
+                total_loss += loss.item()*batch_size
                 correct = outputs.eq(targets).sum().item()
 
     return total_loss/total, 100.*correct/total
