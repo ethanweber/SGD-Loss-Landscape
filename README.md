@@ -71,5 +71,5 @@ python run_network.py \
 python plot_run.py --config-name example_model_1
 
 # visualize loss landscape
-python3 plot_surface.py --mpi -c --dataset regression  --datapath ethan_config_name_sgd --loss_name mse --plot --y=-1:1:40 --x=-1:1:40
+python plot_surface.py --mpi -c --dataset regression  --datapath ethan_config_name_sgd --loss_name mse --plot --y=-1:1:40 --x=-1:1:40
 ```
