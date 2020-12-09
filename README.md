@@ -42,8 +42,6 @@ jupyter notebook --ip 0.0.0.0 --port 8888 --no-browser
 #### <hr> Getting started
 
 ```
-# TODO: use - not _ in args
-
 # create dataset
 python generate_dataset.py \
     --n 1000 \
